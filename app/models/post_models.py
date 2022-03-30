@@ -1,3 +1,4 @@
+from traceback import print_tb
 from typing import Union
 import pymongo
 from datetime import datetime as dt
@@ -49,18 +50,22 @@ class Post:
     @staticmethod
     def update_post(id:str, data:dict):
         paylod = list(db.post.find({"id":id}))
+
         if not paylod:
             return paylod
 
         for item in paylod:
             item["updated_at"] = dt.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(item) 
+
+        paylod[0]["author"] = data["author"]
+        paylod[0]["content"] = data["content"]
+        paylod[0]["tags"] = data["tags"]
+        paylod[0]["title"] = data["title"]
         
         post = db.post.find_one_and_update(
             {"id":id}, 
             {"$set":paylod[0]}, 
             return_document=ReturnDocument.AFTER)
-
 
         post = Post.serialixe_post(post)
 
@@ -69,8 +74,15 @@ class Post:
     @staticmethod
     def validate_keys(keys:set, data:dict):
         bory_keys_set = set(data.keys())
+        if bory_keys_set - keys:
+            print("true")
+        else:
+            print("false")
+        print(keys)
+        if not data:
+            return True
 
-        return bory_keys_set - keys
+        return keys - bory_keys_set
         
     
 
